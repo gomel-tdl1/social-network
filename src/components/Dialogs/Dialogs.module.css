@@ -1,0 +1,37 @@
+.content{
+    display: grid;
+    grid-template-rows: 600px;
+    grid-template-columns: 1fr 5fr;
+}
+.dialogs{
+    border-right: 1px dotted black;
+    display: flex;
+    flex-direction: column;
+}
+.container{
+    padding: 10px;
+    position: relative;
+}
+.messages{
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+    overflow: auto;
+}
+.container .form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translate(-50%);
+}
+.form textarea{
+    max-width: 600px;
+    min-width: 600px;
+    min-height: 50px;
+    border: 1px solid grey;
+    resize: both;
+}

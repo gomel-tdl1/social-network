@@ -1,0 +1,17 @@
+@import '~antd/dist/antd.less';
+
+.app-wrapper {
+  display: grid;
+  grid-template-rows: 60px 1fr;
+  grid-template-columns: 150px 1fr;
+  grid-template-areas: "h h" "n m";
+  width: 1200px;
+  margin: 0 auto;
+}
+.content{
+  grid-area: m;
+  background-color: #E6E6E6;
+  border-radius: 0 0 15px 15px;
+  z-index: 0;
+  position: relative;
+}

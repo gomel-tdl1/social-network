@@ -1,0 +1,19 @@
+.formControl{
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.formControl .error input,
+.formControl .error textarea{
+    border: 2px solid red;
+}
+.error span{
+    color: red;
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(105%, -50%);
+}
+.error div{
+    color: red;
+}

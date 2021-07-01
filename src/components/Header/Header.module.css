@@ -1,0 +1,47 @@
+.header {
+    grid-area: h;
+    background: url(../../assets/images/Header/depositphotos_109226868-stock-illustration-faces-of-people-seamless-background.jpg) 400px/400px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header img{
+    height: 60px;
+}
+.loginBlock{
+    margin-right: 20px;
+    height: 40px;
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background-color: #B2B2B2;
+    cursor: pointer;
+}
+.avatar{
+    width: 35px;
+    height: 35px;
+    overflow: hidden;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+.avatar img{
+    height: 35px;
+}
+.profile{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logout{
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+.logout img{
+    height: 25px;
+    opacity: 0.8;
+}

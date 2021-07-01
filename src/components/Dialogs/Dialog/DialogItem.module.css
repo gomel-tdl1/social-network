@@ -1,0 +1,27 @@
+.item{
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    width: 100%;
+    transition: all 0.5s ease;
+}
+a{
+    color: #010038;
+    text-decoration: none;
+}
+.active{
+    background: linear-gradient(90deg, rgba(184, 107, 255, 0.5), rgba(120, 237, 154, 0.5), rgba(237, 165, 138, 0.5));
+}
+.item__avatar{
+    margin: 7px 10px 4px 10px;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+.item__avatar img{
+    width: 100%;
+}
+.item__name{
+    font-size: 20px;
+}

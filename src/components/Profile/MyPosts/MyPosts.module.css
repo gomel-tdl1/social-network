@@ -1,0 +1,31 @@
+
+.container{
+    color: black;
+}
+.title{
+
+}
+.main{
+     display: flex;
+     align-items: center;
+ }
+textarea {
+    padding: 7px;
+    font-family: sans-serif;
+    margin-right: 10px;
+    border-radius: 5px;
+    max-width: 700px;
+    min-width: 700px;
+    min-height: 100px;
+    max-height: 200px;
+    font-size: 17px;
+}
+button {
+    font-family: sans-serif;
+    height: 30px;
+    width: 80px;
+    background-color: #FFBA2D;
+    border-radius: 5px;
+}
+.content{
+}

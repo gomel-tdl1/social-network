@@ -1,0 +1,20 @@
+.message{
+    width: auto;
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #DDD07E;
+    text-align: center;
+}
+.you{
+    float: left;
+    border-radius: 0 20px 20px 20px;
+    background-color: #FFBA2D;
+}
+.me{
+    float: right;
+    border-radius: 20px 0 20px 20px;
+    background: linear-gradient(90deg, #ffffff 30%, #FF0000 50%, #ffffff 70%);
+}
+.text{
+
+}

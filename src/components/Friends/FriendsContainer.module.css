@@ -1,0 +1,27 @@
+.content{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+}
+.content .search_container{
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 30%;
+    background-color: #FF6E1F;
+}
+.search_container .search{
+    position: sticky;
+}
+.users .preloader{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.content .users{
+    width: 70%;
+    position: relative;
+}
