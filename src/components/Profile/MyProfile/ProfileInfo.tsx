@@ -1,11 +1,14 @@
 import React, {ChangeEvent, FC, useState} from 'react'
-import s from './ProfileInfo.module.css'
 import {NavLink} from "react-router-dom";
 import ProfileStatusWithHooksContainer from "../ProfileStatus/ProfileStatusWithHooksContainer";
 import EditProfileDescription from "../EditProfileDescription/EditProfileDescForm";
 import {ProfileType} from "../../../types/types";
-import {Avatar, Button, Upload} from "antd";
+import {Avatar, Image, Button, Typography, Upload} from "antd";
 import {UploadOutlined, UserOutlined} from '@ant-design/icons';
+import Title from "antd/es/typography/Title";
+import Text from "antd/es/typography/Text";
+import Paragraph from 'antd/lib/typography/Paragraph';
+import Link from 'antd/lib/typography/Link';
 
 type PropsType = {
     profile: ProfileType | null,
@@ -24,7 +27,7 @@ const ProfileInfo: FC<PropsType> = (props) => {
     // @ts-ignore
     let isFriend = (+props.userId !== props.authUserId) && (props.userId !== undefined);
 
-    function nullChecker(item: string | null) {
+    function nullChecker(item: string | null | undefined): string {
         return item ? item : '';
     }
 
@@ -46,59 +49,65 @@ const ProfileInfo: FC<PropsType> = (props) => {
     return (
         <div className='flex gap-12'>
             <div className='flex flex-col items-center gap-4'>
-                <Avatar size={250} src={props.profile?.photos.large ? props.profile.photos.large : <UserOutlined/>}/>
+                <Avatar size={250} src={props.profile?.photos.large ? props.profile.photos.large : <UserOutlined style={{
+                    fontSize: '100px'
+                }}/>} style={{
+                    color: '#D2D4D7',
+                    backgroundColor: '#ffffff',
+                }}/>
                 {props.isOwner &&
                 <div>
-                    {/*<input type="file" onChange={handleChooseNewPhoto}/>*/}
-                    <Upload name='file'
-                            headers={{
-                                authorization: 'authorization-text',
-                            }}>
-                        <Button icon={<UploadOutlined/>}>Click to Upload</Button>
-                    </Upload>
+                    <input type="file" onChange={handleChooseNewPhoto}/>
+                    {/*<Upload name='file'*/}
+                    {/*        headers={{*/}
+                    {/*            authorization: 'authorization-text',*/}
+                    {/*        }}>*/}
+                    {/*    <Button icon={<UploadOutlined/>}>Click to Upload</Button>*/}
+                    {/*</Upload>*/}
                 </div>}
                 {isFriend &&
-                <div className='mt-3'>
+                <div>
                     <NavLink to={'/dialogs'}>
-                        <button onClick={handleWriteMessageClick}>Write message</button>
+                        <Button type={'default'} onClick={handleWriteMessageClick}>Write message</Button>
                     </NavLink>
                 </div>}
             </div>
             {!editMode &&
-            <div className={s.profile__description}>
-                <div className={s.description__name}>{props.profile?.fullName}</div>
+            <Typography className='flex flex-col items-start '>
+                <Title>{props.profile?.fullName}</Title>
                 <ProfileStatusWithHooksContainer/>
 
-                <div className={s.description__info}>
-                    <div className={s.description__item} id='aboutMe'>
-                        <span className="key">About me: </span>
-                        {/*@ts-ignore*/}
-                        <span className="value">{nullChecker(props.profile.aboutMe)}</span>
+                <Paragraph>
+                    <div id='aboutMe'>
+                        <Text strong className="key">About me: </Text>
+                        <Text className="value">{nullChecker(props.profile?.aboutMe)}</Text>
                     </div>
-                    <div className={s.description__item} id='searchJob'>
-                        <span className="key">Looking job: </span>
-                        <span className="value">{props.profile?.lookingForAJob ? 'I search.' : 'I dont search.'}</span>
+                    <div id='searchJob'>
+                        <Text strong className="key">Looking job: </Text>
+                        <Text className="value">{props.profile?.lookingForAJob ? 'I search.' : 'I dont search.'}</Text>
                     </div>
                     {props.profile?.lookingForAJob &&
-                    <div className={s.description__item} id='jobDescription'>
-                        <span className="key">Job description: </span>
-                        <span className="value">{nullChecker(props.profile.lookingForAJobDescription)}</span>
+                    <div id='jobDescription'>
+                        <Text strong className="key">Job description: </Text>
+                        <Text className="value">{nullChecker(props.profile.lookingForAJobDescription)}</Text>
                     </div>}
-                    <div className={s.description__item} id='contacts'>
-                        {contacts.map(item => {
-                            const key = item[0];
-                            const value = item[1];
-                            return (
-                                <div key={key}>
-                                    <span className="key">{key[0].toUpperCase() + key.slice(1)}: </span>
-                                    <a href={nullChecker(value)}><span className="value">{nullChecker(value)}</span></a>
-                                </div>
-                            );
-                        })}
-                    </div>
-                    <button onClick={handleClickEdit} className={s.edit_button}>Edit</button>
-                </div>
-            </div>}
+                </Paragraph>
+                <Paragraph id='contacts'>
+                    {contacts.map(item => {
+                        const key = item[0];
+                        const value = item[1];
+                        return (
+                            <div key={key}>
+                                {value && <div className='flex gap-2'>
+                                    <Text strong className="text-left w-20">{key[0].toUpperCase() + key.slice(1)}: </Text>
+                                    <Link href={nullChecker(value)} target="_blank">{nullChecker(value)}</Link>
+                                </div>}
+                            </div>
+                        );
+                    })}
+                </Paragraph>
+                <Button type="dashed" onClick={handleClickEdit} className='mt-2'>Edit</Button>
+            </Typography>}
 
             {editMode &&
             <EditProfileDescription setEditMode={setEditMode} authUserId={props.authUserId}

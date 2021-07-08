@@ -1,6 +1,8 @@
-import { stopSubmit } from "redux-form";
+import {FormAction, stopSubmit} from "redux-form";
+import { ThunkAction } from "redux-thunk";
 import {authAPI, profileAPI} from "../API/API";
 import {asyncErrorMessageView} from "./app-reducer";
+import {AppStateType, InferActionsTypes} from "./redux-store";
 
 const SET_USER_DATA = 'auth-reducer/SET_USER_DATA';
 const TOGGLE_IS_AUTH = 'auth-reducer/TOGGLE_IS_AUTH';
@@ -8,73 +10,34 @@ const SET_AVATAR_FOR_HEADER = 'auth-reducer/SET_AVATAR_FOR_HEADER';
 const SET_CAPTCHA = 'auth-reducer/SET_CAPTCHA';
 const TOGGLE_IS_CAPTCHA_NEED = 'auth-reducer/TOGGLE_IS_CAPTCHA_NEED';
 
-
-type SetAuthUserDataActionPayloadType = {
-    id: number | null,
-    email: string | null,
-    login: string | null,
-    isAuth: boolean
-}
-type SetAuthUserDataActionType = {
-    type: typeof SET_USER_DATA,
-    payload: SetAuthUserDataActionPayloadType
-}
-export const setAuthUserData = (id: number | null, email: string | null, login: string | null, isAuth: boolean): SetAuthUserDataActionType => ({
-    type: SET_USER_DATA,
-    payload: {
-        id,
-        email,
-        login,
+export const actionsAuth = {
+    setAuthUserData: (id: number | null, email: string | null, login: string | null, isAuth: boolean) => ({
+        type: SET_USER_DATA,
+        payload: {
+            id,
+            email,
+            login,
+            isAuth
+        }
+    } as const),
+    toggleIsAuth: (isAuth: boolean) => ({
+        type: TOGGLE_IS_AUTH,
         isAuth
-    }
-});
-
-type ToggleIsAuthActionType = {
-    type: typeof TOGGLE_IS_AUTH,
-    isAuth: boolean
+    } as const),
+    setAvatarForHeader: (avatar: string) => ({
+        type: SET_AVATAR_FOR_HEADER,
+        avatar
+    } as const),
+    setCaptcha: (captcha: string | null) => ({
+        type: SET_CAPTCHA,
+        captcha
+    } as const),
+    toggleIsCaptchaNeed: (isNeed: boolean) => ({
+        type: TOGGLE_IS_CAPTCHA_NEED,
+        isNeed
+    } as const),
 }
-export const toggleIsAuth = (isAuth: boolean): ToggleIsAuthActionType => ({
-    type: TOGGLE_IS_AUTH,
-    isAuth
-});
 
-export type SetAvatarForHeaderActionType = {
-    type: typeof SET_AVATAR_FOR_HEADER,
-    avatar: string
-}
-export const setAvatarForHeader = (avatar: string): SetAvatarForHeaderActionType => ({
-    type: SET_AVATAR_FOR_HEADER,
-    avatar
-});
-
-type SetCaptchaActionType = {
-    type: typeof SET_CAPTCHA,
-    captcha: string | null
-}
-export const setCaptcha = (captcha: string | null): SetCaptchaActionType => ({
-    type: SET_CAPTCHA,
-    captcha
-});
-
-type ToggleIsCaptchaNeedActionType = {
-    type: typeof TOGGLE_IS_CAPTCHA_NEED,
-    isNeed: boolean
-}
-export const toggleIsCaptchaNeed = (isNeed: boolean): ToggleIsCaptchaNeedActionType => ({
-    type: TOGGLE_IS_CAPTCHA_NEED,
-    isNeed
-});
-
-export type InitialStateType2 = {
-    id: null | number,
-    login: string | null,
-    email: string | null,
-    avatar: string | null,
-    isAuth: boolean,
-    isFetching: boolean,
-    isCaptchaNeed: boolean,
-    captcha: string | null
-}
 const initialState = {
     id: null as number | null,
     login: null as string | null,
@@ -86,8 +49,9 @@ const initialState = {
     captcha: null as string | null
 };
 export type InitialStateType = typeof initialState;
+type ActionsTypes = InferActionsTypes<typeof actionsAuth>
 
-const authReducer = (state = initialState, action: any): InitialStateType => {
+const authReducer = (state = initialState, action: ActionsTypes): InitialStateType => {
     switch (action.type) {
         case SET_USER_DATA:
             return {
@@ -120,41 +84,40 @@ const authReducer = (state = initialState, action: any): InitialStateType => {
     }
 };
 
-//checkAuthenticationThunkCreator
-type CheckAuthenticationThunkType = () => (dispatch: Function) => void;
-export const checkAuthentication: CheckAuthenticationThunkType = () => {
+export type ThunkActionType = ThunkAction<Promise<void>, AppStateType, unknown, ActionsTypes | FormAction>;
+
+export const checkAuthentication = ():ThunkActionType => {
     return async (dispatch) => {
         try {
             let data = await authAPI.isAuth();
             let userData = data.data;
             if (data.resultCode === 0) {
-                dispatch(toggleIsAuth(true));
-                dispatch(setAuthUserData(userData.id, userData.email, userData.login, true));
+                dispatch(actionsAuth.toggleIsAuth(true));
+                dispatch(actionsAuth.setAuthUserData(userData.id, userData.email, userData.login, true));
                 let profileData = await profileAPI.getProfile(userData.id);
-                dispatch(setAvatarForHeader(profileData.photos.small));
+                dispatch(actionsAuth.setAvatarForHeader(profileData.photos.small));
             } else {
-                dispatch(toggleIsAuth(false));
+                dispatch(actionsAuth.toggleIsAuth(false));
             }
         } catch (e) {
             dispatch(asyncErrorMessageView(e));
         }
     }
 };
-//loginOnSiteThunkCreator
-type LoginOnSiteThunkType = (email: string, password: string, rememberMe: boolean, captcha: string) => (dispatch: Function) => void;
-export const loginOnSite: LoginOnSiteThunkType = (email, password, rememberMe, captcha) => {
+
+export const loginOnSite = (email: string, password: string, rememberMe: boolean, captcha: string): ThunkActionType => {
     return async (dispatch) => {
         try {
             let response = await authAPI.loginOnSite(email, password, rememberMe, captcha);
             const actionStopSubmit = stopSubmit('login', {_error: response.data.messages[0]});
             if (response.data.resultCode === 0) {
                 dispatch(checkAuthentication());
-                dispatch(toggleIsCaptchaNeed(false));
-                dispatch(setCaptcha(null));
+                dispatch(actionsAuth.toggleIsCaptchaNeed(false));
+                dispatch(actionsAuth.setCaptcha(null));
             } else if (response.data.resultCode === 10) {
-                dispatch(toggleIsCaptchaNeed(true));
+                dispatch(actionsAuth.toggleIsCaptchaNeed(true));
                 let data = await authAPI.getCaptcha();
-                dispatch(setCaptcha(data.url));
+                dispatch(actionsAuth.setCaptcha(data.url));
                 dispatch(actionStopSubmit);
             } else if (response.data.resultCode === 1) {
                 dispatch(actionStopSubmit);
@@ -164,15 +127,14 @@ export const loginOnSite: LoginOnSiteThunkType = (email, password, rememberMe, c
         }
     };
 };
-//logoutThunkCreator
-type LogoutType = () => (dispatch: Function) => void;
-export const logout: LogoutType = () => {
+
+export const logout = (): ThunkActionType => {
     return async (dispatch) => {
         try {
             let response = await authAPI.logout();
             if (response.data.resultCode === 0) {
                 dispatch(checkAuthentication());
-                dispatch(setAuthUserData(null, null, null, false));
+                dispatch(actionsAuth.setAuthUserData(null, null, null, false));
             }
         } catch (e) {
             dispatch(asyncErrorMessageView(e));

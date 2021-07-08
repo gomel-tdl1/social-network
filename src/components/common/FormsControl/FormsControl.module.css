@@ -1,18 +1,17 @@
 .formControl{
-    margin-bottom: 10px;
     position: relative;
 }
 
 .formControl .error input,
 .formControl .error textarea{
-    border: 2px solid red;
+    border-color: red;
 }
 .error span{
     color: red;
     position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translate(105%, -50%);
+    left: 0;
+    bottom: 0;
+    transform: translate(0, 105%);
 }
 .error div{
     color: red;

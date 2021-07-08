@@ -1,16 +1,17 @@
 import {profileAPI} from "../API/API";
 import { ProfileType } from "../types/types";
+import {AppStateType, InferActionsTypes} from "./redux-store";
+import {ThunkAction} from "redux-thunk";
 
 const TRANSFORM_ID_TO_PROFILE = 'sidebar-reducer/TRANSFORM_ID_TO_PROFILE';
 
-type TransformIdToProfileActionType = {
-    type: typeof TRANSFORM_ID_TO_PROFILE,
-    data: Array<ProfileType>
+export const actionsSideBar = {
+    transformIdToProfile : (data: Array<ProfileType>) => ({
+        type: TRANSFORM_ID_TO_PROFILE,
+        data
+    } as const)
 }
-const transformIdToProfile = (data: Array<ProfileType>): TransformIdToProfileActionType => ({
-    type: TRANSFORM_ID_TO_PROFILE,
-    data
-});
+
 
 const initialState = {
     viewsIDs: [
@@ -21,22 +22,10 @@ const initialState = {
     views:[] as ProfileType[]
 };
 type InitialStateType = typeof initialState;
+type ActionsTypes = InferActionsTypes<typeof actionsSideBar>
 
-//getUserProfileThunkCreator
-type GetUserProfileThunkType = (ids: Array<number>) => (dispatch: Function) => void
-export const getUsersProfile: GetUserProfileThunkType = (ids) => {
-    return async (dispatch) => {
-        let profiles = [...ids];
-        let data = await Promise.all(profiles.map(id => {
-            return profileAPI.getProfile(id).then((data: ProfileType) => {
-                return data;
-            });
-        }));
-        dispatch(transformIdToProfile(data));
-    }
-};
 
-const sideBarReducer = (state = initialState, action: any): InitialStateType => {
+const sideBarReducer = (state = initialState, action: ActionsTypes): InitialStateType => {
     if (action.type === TRANSFORM_ID_TO_PROFILE) {
         return {
             ...state,
@@ -44,6 +33,20 @@ const sideBarReducer = (state = initialState, action: any): InitialStateType => 
         }
     } else {
         return {...state};
+    }
+};
+
+type ThunkActionType = ThunkAction<Promise<void>, AppStateType, unknown, ActionsTypes>;
+
+export const getUsersProfile = (ids: number[]): ThunkActionType => {
+    return async (dispatch) => {
+        let profiles = [...ids];
+        let data = await Promise.all(profiles.map(id => {
+            return profileAPI.getProfile(id).then((data: ProfileType) => {
+                return data;
+            });
+        }));
+        dispatch(actionsSideBar.transformIdToProfile(data));
     }
 };
 export default sideBarReducer;

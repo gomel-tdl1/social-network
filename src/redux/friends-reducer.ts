@@ -1,8 +1,7 @@
 import {usersAPI} from "../API/API";
 import {UserType} from "../types/types";
 import {asyncErrorMessageView} from "./app-reducer";
-import {Dispatch} from "redux";
-import {AppStateType} from "./redux-store";
+import {AppStateType, InferActionsTypes} from "./redux-store";
 import {ThunkAction} from "redux-thunk";
 
 const ADD_FRIEND = 'friends-reducer/ADD_FRIEND';
@@ -13,72 +12,36 @@ const SET_TOTAL_USERS_COUNT = 'friends-reducer/SET_TOTAL_USERS_COUNT';
 const TOGGLE_IS_FETCHING = 'friends-reducer/TOGGLE_IS_FETCHING';
 const TOGGLE_BUTTON_IN_PROGRESS = 'friends-reducer/TOGGLE_BUTTON_IN_PROGRESS';
 
-type AddFriendSuccessActionType = {
-    type: typeof ADD_FRIEND,
-    userId: number
+export const actionsDialogs = {
+    addFriendSuccess: (userId: number) => ({
+        type: ADD_FRIEND,
+        userId
+    } as const),
+    removeFriendSuccess: (userId: number) => ({
+        type: REMOVE_FRIEND,
+        userId
+    } as const),
+    setUsers: (users: Array<UserType>) => ({
+        type: SET_USERS,
+        users
+    } as const),
+    setTotalUsersCount: (totalCount: number) => ({
+        type: SET_TOTAL_USERS_COUNT,
+        totalCount
+    } as const),
+    toggleIsFetching: (isFetching: boolean) => ({
+        type: TOGGLE_IS_FETCHING,
+        isFetching
+    } as const),
+    toggleButtonInProgress: (isFetching: boolean, userId: number) => ({
+        type: TOGGLE_BUTTON_IN_PROGRESS,
+        isFetching,
+        userId
+    } as const)
 }
-export const addFriendSuccess = (userId: number): AddFriendSuccessActionType => ({
-    type: ADD_FRIEND,
-    userId
-});
 
-type RemoveFriendSuccessActionType = {
-    type: typeof REMOVE_FRIEND,
-    userId: number
-}
-export const removeFriendSuccess = (userId: number): RemoveFriendSuccessActionType => ({
-    type: REMOVE_FRIEND,
-    userId
-});
 
-type SetUsersActionType = {
-    type: typeof SET_USERS,
-    users: Array<UserType>
-}
-export const setUsers = (users: Array<UserType>): SetUsersActionType => ({
-    type: SET_USERS,
-    users
-});
-
-type SetTotalUsersCountActionType = {
-    type: typeof SET_TOTAL_USERS_COUNT,
-    totalCount: number
-}
-export const setTotalUsersCount = (totalCount: number): SetTotalUsersCountActionType => ({
-    type: SET_TOTAL_USERS_COUNT,
-    totalCount
-});
-// export const setCurrentPage = (page) => ({
-//     type: SET_CURRENT_PAGE,
-//     currentPage: page
-// });
-type ToggleIsFetchingActionType = {
-    type: typeof TOGGLE_IS_FETCHING,
-    isFetching: boolean
-}
-export const toggleIsFetching = (isFetching: boolean): ToggleIsFetchingActionType => ({
-    type: TOGGLE_IS_FETCHING,
-    isFetching
-});
-
-type ToggleButtonInProgressActionType = {
-    type: typeof TOGGLE_BUTTON_IN_PROGRESS,
-    isFetching: boolean,
-    userId: number
-}
-export const toggleButtonInProgress = (isFetching: boolean, userId: number): ToggleButtonInProgressActionType => ({
-    type: TOGGLE_BUTTON_IN_PROGRESS,
-    isFetching,
-    userId
-});
-
-type ActionsTypes =
-    AddFriendSuccessActionType
-    | RemoveFriendSuccessActionType
-    | SetUsersActionType
-    | SetTotalUsersCountActionType
-    | ToggleIsFetchingActionType
-    | ToggleButtonInProgressActionType;
+type ActionsTypes = InferActionsTypes<typeof actionsDialogs>
 
 const initialState = {
     users: [] as Array<UserType>,
@@ -113,11 +76,6 @@ const friendsReducer = (state = initialState, action: ActionsTypes): InitialStat
                 ...state,
                 users: action.users
             };
-        // case SET_CURRENT_PAGE:
-        //     return {
-        //         ...state,
-        //         currentPage: action.currentPage
-        //     };
         case SET_TOTAL_USERS_COUNT:
             return {
                 ...state,
@@ -146,47 +104,45 @@ type GetUsersResultType = {
     error: any
 }
 
-// type DispatchType = Dispatch<ActionsTypes>
-// type GetStateType = () => AppStateType;
-
 type ThunkActionType = ThunkAction<Promise<void>, AppStateType, unknown, ActionsTypes>;
 
 //getUsersThunkCreator
 export const getUsers = (pageSize: number, currentPage: number): ThunkActionType => {
     return async (dispatch) => {
-        dispatch(toggleIsFetching(true));
+        dispatch(actionsDialogs.toggleIsFetching(true));
         let data: GetUsersResultType = await usersAPI.getUsers(pageSize, currentPage);
-        dispatch(toggleIsFetching(false));
-        dispatch(setUsers(data.items));
-        dispatch(setTotalUsersCount(data.totalCount));
+        dispatch(actionsDialogs.toggleIsFetching(false));
+        dispatch(actionsDialogs.setUsers(data.items));
+        dispatch(actionsDialogs.setTotalUsersCount(data.totalCount));
     }
 };
 //getUsersChangeThunkCreator
 export const getUsersChange = (pageSize: number, pageNumber: number): ThunkActionType => {
     return async (dispatch) => {
         // dispatch(setCurrentPage(pageNumber));
-        dispatch(toggleIsFetching(true));
+        dispatch(actionsDialogs.toggleIsFetching(true));
         let data: GetUsersResultType = await usersAPI.getUsers(pageSize, pageNumber);
-        dispatch(toggleIsFetching(false));
-        dispatch(setUsers(data.items));
+        dispatch(actionsDialogs.toggleIsFetching(false));
+        dispatch(actionsDialogs.setUsers(data.items));
     }
 };
 
 const _addRemoveFlow = async (dispatch: any,
                               userId: number,
                               apiMethod: any,
-                              actionCreator: (userId: number) => AddFriendSuccessActionType | RemoveFriendSuccessActionType) => {
+                              actionCreator: (userId: number) => ReturnType<typeof actionsDialogs.addFriendSuccess> | ReturnType<typeof actionsDialogs.removeFriendSuccess>) => {
     try {
-        dispatch(toggleButtonInProgress(true, userId));
+        dispatch(actionsDialogs.toggleButtonInProgress(true, userId));
         let data = await apiMethod(userId);
         if (data.resultCode === 0) {
             dispatch(actionCreator(userId));
         } else {
             throw new Error(data.messages[0])
         }
-        dispatch(toggleButtonInProgress(false, userId));
+        dispatch(actionsDialogs.toggleButtonInProgress(false, userId));
     } catch (e) {
         dispatch(asyncErrorMessageView(e));
+        dispatch(actionsDialogs.toggleButtonInProgress(false, userId));
     }
 }
 
@@ -194,14 +150,14 @@ const _addRemoveFlow = async (dispatch: any,
 export const removeFriend = (id: number): ThunkActionType => {
     return async (dispatch) => {
         let apiMethod = usersAPI.deleteFriend.bind(usersAPI);
-        _addRemoveFlow(dispatch, id, apiMethod, removeFriendSuccess);
+        _addRemoveFlow(dispatch, id, apiMethod, actionsDialogs.removeFriendSuccess);
     }
 };
 // addFriendThunkCreator
 export const addFriend = (id: number): ThunkActionType => {
     return async (dispatch) => {
         let apiMethod = usersAPI.follow.bind(usersAPI);
-        _addRemoveFlow(dispatch, id, apiMethod, addFriendSuccess);
+        _addRemoveFlow(dispatch, id, apiMethod, actionsDialogs.addFriendSuccess);
     }
 };
 

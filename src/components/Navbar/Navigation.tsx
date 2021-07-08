@@ -1,16 +1,19 @@
 import React, {FC} from 'react';
 import {Menu} from "antd";
 import {GlobalOutlined, MessageOutlined, SettingOutlined, TeamOutlined, UserOutlined} from "@ant-design/icons";
-import {NavLink} from "react-router-dom";
+import {NavLink, useHistory} from "react-router-dom";
 import SideBarContainer from "./SideBar/SideBarContainer";
 
 type PropsType = {}
 const Navigation: FC<PropsType> = React.memo((props) => {
+    let history = useHistory();
+    let defaultSelectedKey = history.location.pathname.toLowerCase().split('/')[0];
+
     return (
         <Menu
             style={{width: 299,
             borderRight: '1px solid #E5E7EB'}}
-            defaultSelectedKeys={['profile']}
+            defaultSelectedKeys={[defaultSelectedKey]}
             mode={'vertical'}
             theme={'light'}
         >

@@ -1,9 +1,25 @@
 import {createField, Input} from "../../common/FormsControl/FormsControl";
 import {required} from "../../../utils/validators";
-import {reduxForm} from "redux-form";
-import React from "react";
+import {InjectedFormProps, reduxForm} from "redux-form";
+import React, {FC} from "react";
+import {ProfileType} from "../../../types/types";
+import {Button} from "antd";
 
-function EditProfileDescForm(props) {
+type EditDescriptionType = {
+    fullName: string
+    aboutMe: string
+    lookingForAJob: boolean
+    lookingForAJobDescription: string
+    facebook: string
+    github: string
+    instagram: string
+    mainLink: string
+    twitter: string
+    vk: string
+    website: string
+    youtube: string
+}
+const EditProfileDescForm: FC<InjectedFormProps<EditDescriptionType>> = (props) => {
     return (
         <form onSubmit={props.handleSubmit}>
             {createField(Input, 'fullName', [required], 'Full name...')}
@@ -24,20 +40,25 @@ function EditProfileDescForm(props) {
                 {props.error}
             </div>
             <div>
-                <button>Save</button>
+                <Button type={'primary'} htmlType={'submit'}>Send</Button>
             </div>
         </form>
     );
 }
 
-const EditProfileDescReduxForm = reduxForm({
+const EditProfileDescReduxForm = reduxForm<EditDescriptionType>({
     form: 'editProfileDescription'
 })(EditProfileDescForm);
 
-const EditProfileDescription = (props) => {
-    const onSubmit = (data) => {
+type PropsType = {
+    setEditMode: (editMode: boolean) => void
+    authUserId: number | null,
+    updateProfileDescription: (data: ProfileType, id: number) => void
+}
+const EditProfileDescription: FC<PropsType> = (props) => {
+    const onSubmit = (data: any) => {
         props.setEditMode(false);
-        props.updateProfileDescription(data, props.authUserId);
+        if (props.authUserId) props.updateProfileDescription(data, props.authUserId);
         console.log(data)
     };
 

@@ -1,13 +1,4 @@
-.content{
-    display: grid;
-    grid-template-rows: 600px;
-    grid-template-columns: 1fr 5fr;
-}
-.dialogs{
-    border-right: 1px dotted black;
-    display: flex;
-    flex-direction: column;
-}
+
 .container{
     padding: 10px;
     position: relative;

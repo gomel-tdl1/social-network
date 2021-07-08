@@ -10,8 +10,7 @@ import Preloader from "./components/common/Preloader/Preloader";
 import store, {AppStateType} from "./redux/redux-store";
 import {withSuspense} from "./hoc/withSuspense";
 import {getErrorMessage, getInitialized} from "./redux/selectors/app-selector";
-import ErrorComponent from "./components/common/Error/ErrorComponent";
-import {Layout} from "antd";
+import {Layout, notification} from "antd";
 import Sider from "antd/es/layout/Sider";
 import {Content} from "antd/es/layout/layout";
 
@@ -47,18 +46,25 @@ const App: FC<PropsType> = (props) => {
         // @ts-ignore
         return window.removeEventListener('unhandledrejection', catchAllUnhandledErrors);
     }, []);
+    useEffect(() => {
+        if(props.errorMessage){
+            notification.error({
+                key: 'updatable',
+                message: props.errorMessage
+            })
+        }
+    }, [props.errorMessage]);
 
     if (!props.initialized) return <Preloader height={'700px'}/>;
 
     return (
         <Layout>
-            {props.errorMessage && <ErrorComponent message={props.errorMessage}/>}
             <HeaderContainer/>
             <Layout>
                 <Sider width={300} theme={'light'} className='border'>
                     <Navigation/>
                 </Sider>
-                <Content className='relative'>
+                <Content className='relative h-full'>
                     <Switch>
                         <Route exact path='/'
                                render={() => <Redirect to={"/profile"}/>}/>

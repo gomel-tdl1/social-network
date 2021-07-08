@@ -1,6 +1,6 @@
 import React from 'react';
-import {act, create} from 'react-test-renderer'
 import ProfileStatusWithHooks from "./ProfileStatusWithHooks";
+import {act, create} from "react-test-renderer";
 
 describe('ProfileStatus component', () => {
     test('Status from props should be in status hook useState', () => {
@@ -28,7 +28,7 @@ describe('ProfileStatus component', () => {
         const instance = component.root;
         const span = instance.findByType('span');
         act(() => {
-            span.parent.props.onDoubleClick();
+            span.parent?.props.onDoubleClick();
         });
         const input = instance.findByType('input');
         expect(input).not.toBeNull();
@@ -38,17 +38,17 @@ describe('ProfileStatus component', () => {
         const instance = component.root;
         const span = instance.findByType('span');
         act(() => {
-            span.parent.props.onDoubleClick();
+            span.parent?.props.onDoubleClick();
         });
         const input = instance.findByType('input');
         expect(input.props.value).toBe('Ilya');
     });
     test('After onBlur input should will be display span ', () => {
-        const component = create(<ProfileStatusWithHooks status={'Ilya'} updateUserStatus={(s) => s}/>);
+        const component = create(<ProfileStatusWithHooks status={'Ilya'} updateUserStatus={(s: string) => s}/>);
         const instance = component.root;
         const span = instance.findByType('span');
         act(() => {
-            span.parent.props.onDoubleClick();
+            span.parent?.props.onDoubleClick();
         });
         const input = instance.findByType('input');
         act(() => {

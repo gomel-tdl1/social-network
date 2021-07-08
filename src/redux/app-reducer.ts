@@ -1,30 +1,28 @@
 import {checkAuthentication} from "./auth-reducer";
-import {Dispatch} from "redux";
 import {ThunkAction} from "redux-thunk";
-import {AppStateType} from "./redux-store";
+import {AppStateType, InferActionsTypes} from "./redux-store";
 
 const INITIALIZED_SUCCESS = 'app-reducer/INITIALIZED_SUCCESS';
 const SET_ERROR_MESSAGE = 'app-reducer/SET_ERROR_MESSAGE';
 
-type InitializedSuccessActionType = { type: typeof INITIALIZED_SUCCESS }
-export const initializedSuccess = (): InitializedSuccessActionType => ({
-    type: INITIALIZED_SUCCESS
-});
-
-type SetErrorMessageActionType = { type: typeof SET_ERROR_MESSAGE, errorMessage: string | null }
-export const setErrorMessage = (errorMessage: string | null): SetErrorMessageActionType => ({
-    type: SET_ERROR_MESSAGE,
-    errorMessage
-});
+export const actionsApp = {
+    initializedSuccess: () => ({
+        type: INITIALIZED_SUCCESS
+    } as const),
+    setErrorMessage: (errorMessage: string | null) => ({
+        type: SET_ERROR_MESSAGE,
+        errorMessage
+    } as const)
+}
 
 const initialState = {
     initialized: false,
     errorMessage: null as string | null,
-    theme:  'light' as 'dark' | 'light'
+    theme: 'light' as 'dark' | 'light'
 };
 export type InitialStateType = typeof initialState;
 
-type ActionsTypes = InitializedSuccessActionType | SetErrorMessageActionType
+type ActionsTypes = InferActionsTypes<typeof actionsApp>
 
 const appReducer = (state = initialState, action: ActionsTypes): InitialStateType => {
     switch (action.type) {
@@ -44,21 +42,20 @@ const appReducer = (state = initialState, action: ActionsTypes): InitialStateTyp
     }
 };
 
-type DispatchType = Dispatch<ActionsTypes>
 type ThunkActionType = ThunkAction<Promise<void>, AppStateType, unknown, ActionsTypes>;
 
 export const initializeApp = (): ThunkActionType => async (dispatch) => {
     await dispatch(checkAuthentication());
-    dispatch(initializedSuccess());
+    dispatch(actionsApp.initializedSuccess());
 };
 
 
 export const asyncErrorMessageView = (error: any): ThunkActionType =>
     async (dispatch) => {
-    dispatch(setErrorMessage(error.message));
-    setTimeout(() => {
-        dispatch(setErrorMessage(null));
-    }, 3000)
-};
+        dispatch(actionsApp.setErrorMessage(error.message));
+        setTimeout(() => {
+            dispatch(actionsApp.setErrorMessage(null));
+        }, 3000)
+    };
 
 export default appReducer;

@@ -1,9 +1,9 @@
 import {profileAPI} from "../API/API";
-import {setAvatarForHeader, SetAvatarForHeaderActionType} from "./auth-reducer";
 import {asyncErrorMessageView} from "./app-reducer";
 import {PhotosType, PostType, ProfileType} from "../types/types";
 import {ThunkAction} from "redux-thunk";
-import {AppStateType} from "./redux-store";
+import {AppStateType, InferActionsTypes} from "./redux-store";
+import {actionsAuth} from "./auth-reducer";
 
 const ADD_POST = 'profile-reducer/ADD-POST';
 const SET_USER_PROFILE = 'profile-reducer/SET_USER_PROFILE';
@@ -11,61 +11,30 @@ const TOGGLE_IS_FETCHING = 'profile-reducer/TOGGLE_IS_FETCHING';
 const SET_USER_STATUS = 'profile-reducer/SET_USER_STATUS';
 const UPDATE_PHOTO_SUCCESS = 'profile-reducer/UPDATE_PHOTO_SUCCESS';
 
-
-type AddPostActionType = {
-    type: typeof ADD_POST,
-    userId: number,
-    newPostText: string
+export const actionsProfile = {
+    addPost: (id: number, text: string) => ({
+        type: ADD_POST,
+        userId: id,
+        newPostText: text
+    } as const),
+    setUserProfile: (profile: ProfileType) => ({
+        type: SET_USER_PROFILE,
+        profile
+    } as const),
+    setUserStatus: (status: string) => ({
+        type: SET_USER_STATUS,
+        status
+    } as const),
+    toggleIsFetching: (isFetching: boolean) => ({
+        type: TOGGLE_IS_FETCHING,
+        isFetching
+    } as const),
+    updateProfilePhotoSuccess: (photos: PhotosType) => ({
+        type: UPDATE_PHOTO_SUCCESS,
+        photos
+    } as const),
 }
-export const addPost = (id: number, text: string): AddPostActionType => ({
-    type: ADD_POST,
-    userId: id,
-    newPostText: text
-});
-
-type SetUserProfileActionType = {
-    type: typeof SET_USER_PROFILE,
-    profile: ProfileType
-}
-export const setUserProfile = (profile: any): SetUserProfileActionType => ({
-    type: SET_USER_PROFILE,
-    profile
-});
-
-type SetUserStatusActionType = {
-    type: typeof SET_USER_STATUS,
-    status: string
-}
-export const setUserStatus = (status: string): SetUserStatusActionType => ({
-    type: SET_USER_STATUS,
-    status
-});
-
-type ToggleIsFetchingActionType = {
-    type: typeof TOGGLE_IS_FETCHING,
-    isFetching: boolean
-}
-export const toggleIsFetching = (isFetching: boolean): ToggleIsFetchingActionType => ({
-    type: TOGGLE_IS_FETCHING,
-    isFetching
-});
-
-type UpdateProfilePhotoSuccessActionType = {
-    type: typeof UPDATE_PHOTO_SUCCESS,
-    photos: PhotosType
-}
-export const updateProfilePhotoSuccess = (photos: PhotosType): UpdateProfilePhotoSuccessActionType => ({
-    type: UPDATE_PHOTO_SUCCESS,
-    photos
-});
-
-type ActionsTypes =
-    AddPostActionType
-    | SetUserProfileActionType
-    | SetUserStatusActionType
-    | ToggleIsFetchingActionType
-    | UpdateProfilePhotoSuccessActionType
-    | SetAvatarForHeaderActionType;
+type ActionsTypes = InferActionsTypes<typeof actionsProfile> | InferActionsTypes<typeof actionsAuth>
 
 let initialState = {
     postsData: [] as Array<PostType>,
@@ -96,7 +65,7 @@ const profileReducer = (state = initialState, action: ActionsTypes): InitialStat
         case SET_USER_STATUS:
             return {...state, status: action.status};
         case UPDATE_PHOTO_SUCCESS:
-            //@ts-ignore
+            // @ts-ignore
             return {...state, profile: {...state.profile, photos: action.photos}};
 
         default:
@@ -110,19 +79,19 @@ type ThunkActionType = ThunkAction<Promise<void>, AppStateType, unknown, Actions
 //getUserProfileThunkCreator
 export const getUserProfile = (id: number): ThunkActionType => {
     return async (dispatch) => {
-        dispatch(toggleIsFetching(true));
+        dispatch(actionsProfile.toggleIsFetching(true));
         let data = await profileAPI.getProfile(id);
-        dispatch(toggleIsFetching(false));
-        dispatch(setUserProfile(data));
+        dispatch(actionsProfile.toggleIsFetching(false));
+        dispatch(actionsProfile.setUserProfile(data));
     }
 };
 //getUserStatusThunkCreator
 export const getUserStatus = (id: number): ThunkActionType => {
     return async (dispatch) => {
-        dispatch(toggleIsFetching(true));
+        dispatch(actionsProfile.toggleIsFetching(true));
         let data = await profileAPI.getStatus(id);
-        dispatch(toggleIsFetching(false));
-        dispatch(setUserStatus(data));
+        dispatch(actionsProfile.toggleIsFetching(false));
+        dispatch(actionsProfile.setUserStatus(data));
     }
 };
 // updateUserStatusThunkCreator
@@ -131,7 +100,7 @@ export const updateUserStatus = (status: string): ThunkActionType => {
         try {
             let response = await profileAPI.updateStatus(status);
             if (response.data.resultCode === 0) {
-                dispatch(setUserStatus(status))
+                dispatch(actionsProfile.setUserStatus(status))
             } else {
                 throw new Error(response.data.messages[0]);
             }
@@ -146,8 +115,8 @@ export const updateProfilePhoto = (file: any): ThunkActionType => {
         try {
             let response = await profileAPI.updateProfilePhoto(file);
             if (response.resultCode === 0) {
-                dispatch(updateProfilePhotoSuccess(response.data.photos));
-                dispatch(setAvatarForHeader(response.data.photos.small))
+                dispatch(actionsProfile.updateProfilePhotoSuccess(response.data.photos));
+                dispatch(actionsAuth.setAvatarForHeader(response.data.photos.small))
             } else {
                 throw new Error(response.messages[0]);
             }

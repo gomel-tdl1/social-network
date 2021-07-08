@@ -1,13 +1,13 @@
 import React, {FC, useEffect} from 'react';
 import s from './Messages.module.css';
-import {Field, InjectedFormProps, reduxForm} from "redux-form";
+import {InjectedFormProps, reduxForm} from "redux-form";
 import {createField, Textarea} from "../../common/FormsControl/FormsControl";
 import {maxLengthCreator, required} from "../../../utils/validators";
 import Message from "./Message/Message";
 import {MessagesPropsType} from "./MessagesContainer";
-import {log} from "util";
+import { Button } from 'antd';
 
-type SendMessageDataType ={
+type SendMessageDataType = {
     message: string
 }
 
@@ -15,17 +15,17 @@ const ws = new WebSocket('wss://social-network.samuraijs.com/handlers/ChatHandle
 
 const Messages: FC<MessagesPropsType> = (props) => {
 
-    useEffect(()=>{
+    useEffect(() => {
         ws.addEventListener('message', (e) => {
             console.log(JSON.parse(e.data))
         })
-    },[])
+    }, [])
 
     function handleSendMessageClick(data: SendMessageDataType): void {
         props.sendMessage(props.match.params.friendId, data.message)
     }
 
-    function whoSendMessage(senderId: number): string {
+    function whoSendMessage(senderId: number): "me" | "you" {
         return senderId === props.authUserId ? 'me' : 'you';
     }
 
@@ -49,7 +49,7 @@ const MessagesForm: FC<InjectedFormProps<SendMessageDataType>> = (props) => {
     return (
         <form className={s.form} onSubmit={props.handleSubmit}>
             {createField(Textarea, 'message', [required, maxLength300], 'Enter message...')}
-            <button>Send</button>
+            <Button htmlType={'submit'} type={'primary'}>Send</Button>
         </form>
     )
 };

@@ -1,35 +1,31 @@
 import {dialogsAPI} from "../API/API";
 import {asyncErrorMessageView} from "./app-reducer";
-import {DialogType, MessageType, PhotosType} from "../types/types";
+import {DialogType, MessageType} from "../types/types";
+import {AppStateType, InferActionsTypes} from "./redux-store";
+import {ThunkAction} from "redux-thunk";
 
 const UPDATE_DIALOGS_DATA = 'dialogs-reducer/UPDATE_DIALOGS_DATA';
 const UPDATE_MESSAGES_DATA = 'dialogs-reducer/UPDATE_MESSAGES_DATA';
 
-type UpdateDialogsDataActionType = {
-    type: typeof UPDATE_DIALOGS_DATA,
-    dialogsData: Array<DialogType>
+export const actionsDialogs = {
+    updateDialogsData: (dialogsData: Array<DialogType>) => ({
+        type: UPDATE_DIALOGS_DATA,
+        dialogsData
+    } as const),
+    updateMessagesData: (messagesData: Array<MessageType>) => ({
+        type: UPDATE_MESSAGES_DATA,
+        messagesData
+    } as const)
 }
-export const updateDialogsData = (dialogsData: Array<DialogType>): UpdateDialogsDataActionType => ({
-    type: UPDATE_DIALOGS_DATA,
-    dialogsData
-});
-
-type UpdateMessagesDataActionType = {
-    type: typeof UPDATE_MESSAGES_DATA,
-    messagesData: Array<MessageType>
-}
-export const updateMessagesData = (messagesData: Array<MessageType>): UpdateMessagesDataActionType => ({
-    type: UPDATE_MESSAGES_DATA,
-    messagesData
-});
 
 const initialState = {
     dialogsData: [] as Array<DialogType>,
     messagesData: [] as Array<MessageType>
 };
 export type InitialStateType = typeof initialState;
+type ActionsTypes = InferActionsTypes<typeof actionsDialogs>;
 
-const dialogsReducer = (state = initialState, action: any): InitialStateType => {
+const dialogsReducer = (state = initialState, action: ActionsTypes): InitialStateType => {
     switch (action.type) {
         case UPDATE_DIALOGS_DATA:
             return {
@@ -51,9 +47,9 @@ function trueResultCode(data: any): boolean { //изменить тип data, п
     return data.resultCode === 0;
 }
 
-//startChattingThunkCreator
-type StartChattingThunkType = (userId: number) => (dispatch: Function) => void
-export const startChatting: StartChattingThunkType = (userId) => async (dispatch) => {
+export type ThunkActionType = ThunkAction<Promise<void>, AppStateType, unknown, ActionsTypes>;
+
+export const startChatting = (userId: number): ThunkActionType => async (dispatch) => {
     try {
         let data = await dialogsAPI.startChatting(userId);
         if (trueResultCode(data)) {
@@ -65,23 +61,24 @@ export const startChatting: StartChattingThunkType = (userId) => async (dispatch
         dispatch(asyncErrorMessageView(e));
     }
 };
-//getDialogsThunkCreator
-type GetDialogsThunkType = () => (dispatch: Function) => void
-export const getDialogs: GetDialogsThunkType = () => async (dispatch) => {
+
+export const getDialogs = (): ThunkActionType => async (dispatch) => {
     let data = await dialogsAPI.getDialogs();
-    dispatch(updateDialogsData(data));
+    dispatch(actionsDialogs.updateDialogsData(data));
 };
-//getMessagesThunkCreator
-type GetMessagesThunkType = (friendId: number) => (dispatch: Function) => void
-export const getMessages: GetMessagesThunkType = (friendId) => async (dispatch) => {
+
+export const getMessages = (friendId: number): ThunkActionType => async (dispatch) => {
     let data = await dialogsAPI.getMessages(friendId);
-    dispatch(updateMessagesData(data.items));
+    dispatch(actionsDialogs.updateMessagesData(data.items));
 };
-//sendMessageThunkCreator
-type SendMessageThunkType = (friendId: number, messageText: string) => (dispatch: Function) => void
-export const sendMessage: SendMessageThunkType = (friendId, messageText) => async (dispatch) => {
-    let data = await dialogsAPI.sendMessage(friendId, messageText);
-    dispatch(getMessages(friendId));
+
+export const sendMessage = (friendId: number, messageText: string): ThunkActionType => async (dispatch) => {
+    try {
+        let data = await dialogsAPI.sendMessage(friendId, messageText);
+        dispatch(getMessages(friendId));
+    } catch (e) {
+        dispatch(asyncErrorMessageView(e));
+    }
 };
 
 export default dialogsReducer;

@@ -1,7 +1,11 @@
-import React from 'react'
+import React, {FC} from 'react'
 import s from './Message.module.css'
 
-export default function Message(props) {
+type PropsType = {
+    who: 'me' | 'you',
+    message: string
+}
+const Message: FC<PropsType> = (props) => {
     let who = props.who === 'you' ? s.you :
         props.who === 'me' ? s.me : null;
     return (
@@ -10,3 +14,5 @@ export default function Message(props) {
         </div>
     );
 }
+
+export default Message;

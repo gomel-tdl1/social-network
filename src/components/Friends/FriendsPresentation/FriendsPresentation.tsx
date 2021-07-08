@@ -1,16 +1,7 @@
 import React from 'react'
-import s from './FriendsPresentation.module.css'
-import Paginator from "../../common/Paginator/Paginator";
 import User from "./User";
-import {
-    getButtonInProgressSelector,
-    getCurrentPageSelector, getIsFetchingSelector,
-    getPageSizeSelector,
-    getTotalCountSelector,
-    getUsersSelector
-} from "../../../redux/selectors/users-selectors";
-import {getIsAuthSelector} from "../../../redux/selectors/auth-selectors";
 import {UserType} from "../../../types/types";
+import Paginator from "../../common/Paginator/Paginator";
 
 type PropsType = {
     users: Array<UserType>,
@@ -29,15 +20,19 @@ type PropsType = {
 
 const FriendsPresentation: React.FC<PropsType> = (props) => {
     return (
-        <div className={s.content}>
+        <div className='flex flex-col items-center gap-4'>
             <Paginator currentPage={+props.match.params.currentPage} totalCount={props.totalCount}
                        pageSize={props.pageSize} onPageChanged={props.onPageChanged} paginatorCount={5}
                        handlePagesCountMath={props.handlePagesCountMath}/>
-            {props.users.map(u => (
-                <User key={u.id} userId={u.id} photos={u.photos} status={u.status} name={u.name} followed={u.followed}
-                      buttonInProgress={props.buttonInProgress} removeFriend={props.removeFriend}
-                      addFriend={props.addFriend} isAuth={props.isAuth}/>
-            ))}
+            <div className='flex flex-col gap-2'>
+                {props.users.map(u => (
+                    <User key={u.id} userId={u.id} photos={u.photos} status={u.status} name={u.name}
+                          followed={u.followed}
+                          buttonInProgress={props.buttonInProgress} removeFriend={props.removeFriend}
+                          addFriend={props.addFriend} isAuth={props.isAuth}/>
+                ))}
+            </div>
+
         </div>
     );
 }

@@ -18,6 +18,9 @@ import {withRouter} from "react-router-dom";
 import {UserType} from "../../types/types";
 import {AppStateType} from "../../redux/redux-store";
 import SearchBar from "./SearchBar/SearchBar";
+import {Layout} from "antd";
+import {Content} from "antd/es/layout/layout";
+import Sider from "antd/es/layout/Sider";
 
 type MapStatePropsType = {
     users: Array<UserType>,
@@ -56,17 +59,17 @@ const FriendsContainer: React.FC<PropsType> = (props) => {
     };
 
     return (
-        <div className={s.content}>
-            <div className={s.users}>
+        <Layout>
+            <Content className='p-4'>
                 {props.isFetching ?
                     <Preloader height='690px'/> :
                     <FriendsPresentation {...props} onPageChanged={onPageChanged}
                                          handlePagesCountMath={handlePagesCountMath}/>}
-            </div>
-            <div className={s.search_container}>
-                <div className={s.search}><SearchBar/></div>
-            </div>
-        </div>
+            </Content>
+            <Sider theme={'light'} width={250}>
+                <div><SearchBar/></div>
+            </Sider>
+        </Layout>
     );
 };
 
